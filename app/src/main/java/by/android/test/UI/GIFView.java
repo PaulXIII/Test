@@ -30,26 +30,35 @@ public class GIFView extends View {
     private int movieWidth, movieHeight;
     private long movieDuration;
     private long mMovieStart;
+    private Context mContext;
 
     final static String gifAddr = "http://media2.giphy.com/media/l46Csd0rqf3K3LXsk/200.gif";
 
     public GIFView(Context context) {
         super(context);
-        init(context);
+        this.mContext = context;
+//        init(context);
     }
 
     public GIFView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        this.mContext = context;
+//        init(context);
     }
 
     public GIFView(Context context, AttributeSet attrs,
                    int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+        this.mContext = context;
+//        init(context);
     }
 
-    private void init(final Context context){
+    public void setGif(String url) {
+        init(mContext, url);
+    }
+
+
+    private void init(final Context context, final String url) {
         setFocusable(true);
 
         gifMovie = null;
@@ -57,14 +66,14 @@ public class GIFView extends View {
         movieHeight = 0;
         movieDuration = 0;
 
-        Thread threadLoadGif = new Thread(new Runnable(){
+        Thread threadLoadGif = new Thread(new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    URL gifURL = new URL(gifAddr);
+                    URL gifURL = new URL(url);
 
-                    HttpURLConnection connection = (HttpURLConnection)gifURL.openConnection();
+                    HttpURLConnection connection = (HttpURLConnection) gifURL.openConnection();
                     gifInputStream = connection.getInputStream();
 
                     //Insert dummy sleep
@@ -76,9 +85,9 @@ public class GIFView extends View {
                         e.printStackTrace();
                     }
 
-                    if(DECODE_STREAM){
+                    if (DECODE_STREAM) {
                         gifMovie = Movie.decodeStream(gifInputStream);
-                    }else{
+                    } else {
                         byte[] array = streamToBytes(gifInputStream);
                         gifMovie = Movie.decodeByteArray(array, 0, array.length);
                     }
@@ -87,7 +96,7 @@ public class GIFView extends View {
                     movieHeight = gifMovie.height();
                     movieDuration = gifMovie.duration();
 
-                    ((MainActivity)context).runOnUiThread(new Runnable(){
+                    ((MainActivity) context).runOnUiThread(new Runnable() {
 
                         @Override
                         public void run() {
@@ -98,7 +107,8 @@ public class GIFView extends View {
                                     movieWidth + " x " + movieHeight + "\n"
                                             + movieDuration,
                                     Toast.LENGTH_LONG).show();
-                        }});
+                        }
+                    });
 
                 } catch (MalformedURLException e) {
                     // TODO Auto-generated catch block
@@ -107,7 +117,8 @@ public class GIFView extends View {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            }});
+            }
+        });
 
         threadLoadGif.start();
 
@@ -132,15 +143,15 @@ public class GIFView extends View {
         setMeasuredDimension(movieWidth, movieHeight);
     }
 
-    public int getMovieWidth(){
+    public int getMovieWidth() {
         return movieWidth;
     }
 
-    public int getMovieHeight(){
+    public int getMovieHeight() {
         return movieHeight;
     }
 
-    public long getMovieDuration(){
+    public long getMovieDuration() {
         return movieDuration;
     }
 
@@ -159,7 +170,7 @@ public class GIFView extends View {
                 dur = 1000;
             }
 
-            int relTime = (int)((now - mMovieStart) % dur);
+            int relTime = (int) ((now - mMovieStart) % dur);
 
             gifMovie.setTime(relTime);
 

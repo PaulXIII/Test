@@ -8,19 +8,26 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import by.android.test.UI.GIFView;
+import by.android.test.UI.recyclerview.ImageAdapter;
 import by.android.test.network.GIFIntentService;
 import by.android.test.network.InternetConnection;
 import by.android.test.network.downloading.ImageProcessing;
@@ -30,13 +37,30 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private static volatile boolean isViewReady;
     private static volatile boolean isConnected;
 
+    private ImageAdapter mAdapter;
+    private String trackNumber;
+    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        GIFView imageView= (GIFView) findViewById(R.id.image_view);
 
+        String gifAddr = "http://media2.giphy.com/media/l46Csd0rqf3K3LXsk/200.gif";
+
+        GIFView imageView = (GIFView) findViewById(R.id.image_view);
+        if (imageView != null) {
+            imageView.setGif(gifAddr);
+        }
+
+        mAdapter = new ImageAdapter();
+
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        if (mRecyclerView != null) {
+            mRecyclerView.swapAdapter(mAdapter, false);
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        }
     }
 
 
@@ -44,9 +68,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     protected void onResume() {
         super.onResume();
         Log.d("TAG", "Service start");
-//        Intent intentService = new Intent(this, GIFIntentService.class);
-//        startService(intentService);
+        Intent intentService = new Intent(this, GIFIntentService.class);
+        startService(intentService);
         Log.d("TAG", "Service end");
+
+
+
     }
 
     @Override

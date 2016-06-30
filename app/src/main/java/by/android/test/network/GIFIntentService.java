@@ -31,12 +31,18 @@ public class GIFIntentService extends IntentService {
 
 
         IApiMethods myApi = mRetrofit.create(IApiMethods.class);
+        Log.d("TAG", "GIFIntentService");
+        myApi.getResults(ServiceHelper.PUBCLIC_KEY);
 
-
-        Call<Result> call = myApi.getResults();
+        Call<Result> call = myApi.getResults(ServiceHelper.PUBCLIC_KEY);
         try {
             Response<Result> resultResponse = call.execute();
 
+            resultResponse.body().getData().get(0).getImages().getFixedHeight().getUrl();
+
+
+            List<Datum> rs=resultResponse.body().getData();
+            Log.d("TAG", "count1 is " +rs.get(0).getId());
             Log.d("TAG", "count " +resultResponse.body());
 
         } catch (IOException e) {

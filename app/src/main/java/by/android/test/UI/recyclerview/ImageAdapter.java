@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import by.android.test.R;
@@ -19,20 +20,28 @@ import by.android.test.UI.GIFView;
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapterHolder> {
 
 
-    private List<Drawable> mDrawables;
+    private List<String> mGifs=new ArrayList<>();
+
+    public List<String> getmGifs() {
+        return mGifs;
+    }
+
+    public void setmGifs(List<String> mGifs) {
+        this.mGifs = mGifs;
+    }
 
     @Override
     public ImageAdapterHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_images_item, parent, false);
-
-        ImageAdapterHolder imageAdapterHolder = new ImageAdapterHolder(view);
-        return imageAdapterHolder;
+        return new ImageAdapterHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ImageAdapterHolder holder, int position) {
-        Drawable drawable = mDrawables.get(position);
-//        holder.image.
+
+        Log.d("TAG", "onBindViewHolder");
+
+        holder.image.setGif(mGifs.get(position));
     }
 
     @Override
@@ -49,7 +58,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
         public ImageAdapterHolder(View itemView) {
             super(itemView);
             view = itemView;
-            image = (GIFView) itemView.findViewById(R.id.image_view);
+            image = (GIFView) itemView.findViewById(R.id.image_view_item);
 
         }
     }
