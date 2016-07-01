@@ -10,20 +10,10 @@
     android:orientation="vertical"
     tools:context="by.android.test.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
 
-    <by.android.test.UI.GIFView
-        android:id="@+id/image_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">

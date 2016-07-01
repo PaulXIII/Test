@@ -1,9 +1,11 @@
 package by.android.test;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -30,12 +32,19 @@ import by.android.test.UI.GIFView;
 import by.android.test.UI.recyclerview.ImageAdapter;
 import by.android.test.network.GIFIntentService;
 import by.android.test.network.InternetConnection;
+import by.android.test.network.UrlsGifs;
 import by.android.test.network.downloading.ImageProcessing;
+import by.android.test.network.response.Result;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private static volatile boolean isViewReady;
     private static volatile boolean isConnected;
+
+    public static final String EXTRA_KEY_MAINACTIVITY_IN = "by.android.test.MainActivity.In";
+    public static final String MAINACTIVITY_IN = "by.android.test.MainActivity.Value";
+
+    public static final String EXTRA_KEY_MAINACTIVITY_OUT = "by.android.test.MainActivity.Out";
 
     private ImageAdapter mAdapter;
     private String trackNumber;
@@ -48,10 +57,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         String gifAddr = "http://media2.giphy.com/media/l46Csd0rqf3K3LXsk/200.gif";
 
-        GIFView imageView = (GIFView) findViewById(R.id.image_view);
-        if (imageView != null) {
-            imageView.setGif(gifAddr);
-        }
+//        GIFView imageView = (GIFView) findViewById(R.id.image_view);
+//        if (imageView != null) {
+//            imageView.setGif(gifAddr);
+//        }
 
         mAdapter = new ImageAdapter();
 
@@ -61,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             mRecyclerView.setHasFixedSize(true);
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         }
+
+
+
     }
 
 
@@ -69,10 +81,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         super.onResume();
         Log.d("TAG", "Service start");
         Intent intentService = new Intent(this, GIFIntentService.class);
+        intentService.putExtra(EXTRA_KEY_MAINACTIVITY_IN, MAINACTIVITY_IN);
         startService(intentService);
         Log.d("TAG", "Service end");
 
+        MyBroadcastReceiver myBroadcastReceiver = new MyBroadcastReceiver();
 
+        //register BroadcastReceiver
+        IntentFilter intentFilter = new IntentFilter(GIFIntentService.ACTION_GIFIntentService);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        registerReceiver(myBroadcastReceiver, intentFilter);
 
     }
 
@@ -117,44 +135,15 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
+    public class MyBroadcastReceiver extends BroadcastReceiver {
 
-    protected void download(final GIFView image, final ProgressBar progress, final String link, final boolean fitHeight) {
-        if (image == null || progress == null || link == null) {
-            return;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            List<String> list= intent.getStringArrayListExtra(EXTRA_KEY_MAINACTIVITY_OUT);
+            mAdapter.updateList(list);
+
         }
-        if (!InternetConnection.isAvailable(this)) {
-            progress.setVisibility(View.GONE);
-            return;
-        }
-        if (!isViewReady) {
-            /**
-             * Global layout listener need for make sure that pre-draw listener will work with proper size
-             */
-            image.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    isViewReady = true;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        image.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                }
-            });
-        }
-        /**
-         * Pre-draw listener used for get real image view dimensions
-         */
-        image.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                Log.i("TAG", "w: " + image.getMeasuredWidth() + ", h: " + image.getMeasuredHeight());
-                if (isViewReady) {
-                    image.getViewTreeObserver().removeOnPreDrawListener(this);
-                    progress.setVisibility(View.VISIBLE);
-                    ImageProcessing imageProcessing = new ImageProcessing(link, fitHeight, image, progress, MainActivity.this);
-                    imageProcessing.execute();
-                }
-                return true;
-            }
-        });
     }
+
 }

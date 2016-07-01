@@ -28,6 +28,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
 
     public void setmGifs(List<String> mGifs) {
         this.mGifs = mGifs;
+
+    }
+
+    public void updateList(List<String> list) {
+        mGifs.clear();
+        mGifs.addAll(list);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -46,7 +53,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mGifs.size();
     }
 
     public static class ImageAdapterHolder extends RecyclerView.ViewHolder {
