@@ -53,8 +53,35 @@ public class GIFView extends View {
 //        init(context);
     }
 
-    public void setGif(String url) {
-        init(mContext, url);
+//    public void setGif(String url) {
+//
+//        init(mContext, url);
+//    }
+
+    public void setGif(Movie movie) {
+
+        this.gifMovie=movie;
+        init(mContext);
+
+    }
+
+    private void init(final Context context) {
+        setFocusable(true);
+
+        movieWidth = gifMovie.width();
+        movieHeight = gifMovie.height();
+        movieDuration = gifMovie.duration();
+
+        ((MainActivity) context).runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                //request re-draw layout
+                invalidate();
+                requestLayout();
+            }
+        });
+
     }
 
 

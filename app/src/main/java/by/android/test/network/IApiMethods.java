@@ -10,8 +10,12 @@ import retrofit2.http.Query;
  */
 public interface IApiMethods {
 
-        @GET("v1/gifs/trending")
-        Call<Result> getResults(@Query("api_key") String key);
+    @GET("v1/gifs/trending")
+    Call<Result> getResults(@Query("api_key") String key);
+
+
+    @GET("v1/gifs/search")
+    Call<Result> getResultsOfSearch(@Query("q") String query, @Query("api_key") String key);
 
 
 }

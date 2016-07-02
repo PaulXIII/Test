@@ -33,34 +33,25 @@ import by.android.test.UI.recyclerview.ImageAdapter;
 import by.android.test.network.GIFIntentService;
 import by.android.test.network.InternetConnection;
 import by.android.test.network.UrlsGifs;
+import by.android.test.network.downloading.CachingGifs;
 import by.android.test.network.downloading.ImageProcessing;
 import by.android.test.network.response.Result;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    private static volatile boolean isViewReady;
-    private static volatile boolean isConnected;
 
     public static final String EXTRA_KEY_MAINACTIVITY_IN = "by.android.test.MainActivity.In";
     public static final String MAINACTIVITY_IN = "by.android.test.MainActivity.Value";
+    public static final String SEARCHABLE_QUERY="by.android.test.MainActivity.Search";
 
     public static final String EXTRA_KEY_MAINACTIVITY_OUT = "by.android.test.MainActivity.Out";
 
     private ImageAdapter mAdapter;
-    private String trackNumber;
-    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        String gifAddr = "http://media2.giphy.com/media/l46Csd0rqf3K3LXsk/200.gif";
-
-//        GIFView imageView = (GIFView) findViewById(R.id.image_view);
-//        if (imageView != null) {
-//            imageView.setGif(gifAddr);
-//        }
 
         mAdapter = new ImageAdapter();
 
@@ -79,11 +70,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("TAG", "Service start");
-        Intent intentService = new Intent(this, GIFIntentService.class);
-        intentService.putExtra(EXTRA_KEY_MAINACTIVITY_IN, MAINACTIVITY_IN);
-        startService(intentService);
-        Log.d("TAG", "Service end");
+        if (CachingGifs.getInstance().getmMemoryCache().isEmpty())
+        {
+            Log.d("TAG", "Service start");
+            Intent intentService = new Intent(this, GIFIntentService.class);
+            intentService.putExtra(EXTRA_KEY_MAINACTIVITY_IN, MAINACTIVITY_IN);
+            startService(intentService);
+            Log.d("TAG", "Service end");
+        }
 
         MyBroadcastReceiver myBroadcastReceiver = new MyBroadcastReceiver();
 
@@ -91,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         IntentFilter intentFilter = new IntentFilter(GIFIntentService.ACTION_GIFIntentService);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(myBroadcastReceiver, intentFilter);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        CachingGifs.getInstance().clearCache();
 
     }
 
@@ -103,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         searchView.setOnQueryTextListener(this);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(
-                new ComponentName(this, MainActivity.class)));
+//        searchView.setSearchableInfo(searchManager.getSearchableInfo(
+//                new ComponentName(this, SearchableActivity.class)));
         searchView.setIconifiedByDefault(false);
 
         return true;
@@ -113,7 +114,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     public boolean onQueryTextSubmit(String query) {
 
-        Toast.makeText(this, "Hello", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Hello "+query, Toast.LENGTH_LONG).show();
+        Intent intent=new Intent(this,SearchableActivity.class);
+        intent.putExtra(SEARCHABLE_QUERY,query);
+        startActivity(intent);
         return true;
     }
 
@@ -122,18 +126,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return false;
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            Toast.makeText(this, "Searching by: " + query, Toast.LENGTH_SHORT).show();
-
-        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            String uri = intent.getDataString();
-            Toast.makeText(this, "Suggestion: " + uri, Toast.LENGTH_SHORT).show();
-        }
-    }
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        super.onNewIntent(intent);
+//        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+//            String query = intent.getStringExtra(SearchManager.QUERY);
+//            Toast.makeText(this, "Searching by: " + query, Toast.LENGTH_SHORT).show();
+//
+//        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+//            String uri = intent.getDataString();
+//            Toast.makeText(this, "Suggestion: " + uri, Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     public class MyBroadcastReceiver extends BroadcastReceiver {
 

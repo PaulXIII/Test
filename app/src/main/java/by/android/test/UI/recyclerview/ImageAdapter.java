@@ -1,5 +1,6 @@
 package by.android.test.UI.recyclerview;
 
+import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import by.android.test.R;
 import by.android.test.UI.GIFView;
+import by.android.test.network.downloading.CachingGifs;
 
 /**
  * Created by Павел on 29.06.2016.
@@ -45,10 +47,16 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
 
     @Override
     public void onBindViewHolder(ImageAdapterHolder holder, int position) {
-
         Log.d("TAG", "onBindViewHolder");
+        String key=mGifs.get(position);
+        Movie gifFromCache=CachingGifs.getInstance().getMovieFromMemCache(key);
+        if (gifFromCache==null)
+        {
+            Log.d("TAG", "gifFromCache is null");
+        }
+        holder.image.setGif(gifFromCache);
+//        holder.image.setGif(key);
 
-        holder.image.setGif(mGifs.get(position));
     }
 
     @Override

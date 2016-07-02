@@ -46,12 +46,12 @@ public class ImageProcessing implements Runnable {
                 URL url = new URL(link);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 bitmap = BitmapFactory.decodeStream(connection.getInputStream());
-                ((App) activity.getApplication()).cache.put(link.hashCode(), bitmap);
+//                ((App) activity.getApplication()).cache.put(link.hashCode(), bitmap);
             }
             int[] measure = measure();
             if (measure != null) {
                 bitmap = Bitmap.createScaledBitmap(bitmap, measure[0], measure[1], false);
-                ((App) activity.getApplication()).cache.put(scaledHash(measure[0], measure[1]), bitmap);
+//                ((App) activity.getApplication()).cache.put(scaledHash(measure[0], measure[1]), bitmap);
             }
         } catch (IOException e) {
             exception = e;
@@ -89,25 +89,25 @@ public class ImageProcessing implements Runnable {
         }
     }
 
-    public void execute() {
-        bitmap = ((App) activity.getApplication()).cache.get(link.hashCode());
-        if (bitmap != null) {
-            int[] measure = measure();
-            if (measure != null) {
-                Bitmap scaled = ((App) activity.getApplication()).cache.get(scaledHash(measure[0], measure[1]));
-                if (scaled == null) {
-                    new Thread(this).start();
-                } else {
-                    bitmap = scaled;
-                    apply();
-                }
-            } else {
-                apply();
-            }
-        } else {
-            new Thread(this).start();
-        }
-    }
+//    public void execute() {
+//        bitmap = ((App) activity.getApplication()).cache.get(link.hashCode());
+//        if (bitmap != null) {
+//            int[] measure = measure();
+//            if (measure != null) {
+//                Bitmap scaled = ((App) activity.getApplication()).cache.get(scaledHash(measure[0], measure[1]));
+//                if (scaled == null) {
+//                    new Thread(this).start();
+//                } else {
+//                    bitmap = scaled;
+//                    apply();
+//                }
+//            } else {
+//                apply();
+//            }
+//        } else {
+//            new Thread(this).start();
+//        }
+//    }
 
     private void apply() {
         if (exception == null) {
