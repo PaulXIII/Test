@@ -3,9 +3,7 @@ package by.android.test.network;
 import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Movie;
-import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,9 +16,9 @@ import java.util.List;
 
 import by.android.test.MainActivity;
 import by.android.test.SearchableActivity;
+import by.android.test.network.api.IApiMethods;
 import by.android.test.network.downloading.CachingGifs;
 import by.android.test.network.response.Datum;
-import by.android.test.network.response.Meta;
 import by.android.test.network.response.Result;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -31,7 +29,7 @@ import retrofit2.Retrofit;
  */
 public class GIFIntentService extends IntentService {
 
-    public static final String ACTION_GIFIntentService = "by.android.test.GIFIntentService.RESPONSE";
+
     private static final boolean DECODE_STREAM = true;
 
     private Retrofit mRetrofit = ServiceHelper.getInstance().getRetrofit();
@@ -44,27 +42,24 @@ public class GIFIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        if (intent.getStringExtra(MainActivity.EXTRA_KEY_MAINACTIVITY_IN).equals(MainActivity.MAINACTIVITY_IN)) {
+        if (intent.getStringExtra(ConstantsNetwork.EXTRA_KEY_IN).equals(ConstantsNetwork.MAINACTIVITY_IN)) {
             downloadDeafualtGifs();
+        } else {
+            if (intent.getStringExtra(ConstantsNetwork.EXTRA_KEY_IN).
+                    equals(ConstantsNetwork.SEARCHABLEACTIVITY_IN)) {
+                String query = intent.getStringExtra(ConstantsNetwork.SEARCHABLEACTIVITY_QUERY);
+                downloadSearchGifs(query);
+            }
         }
-
-        if (intent.getStringExtra(SearchableActivity.EXTRA_KEY_SEARCHABLEACTIVITY_IN).
-                equals(SearchableActivity.SEARCHABLEACTIVITY_IN))
-        {
-
-
-            downloadSearchGifs();
-        }
-
-
     }
+
 
     private void downloadDeafualtGifs() {
         IApiMethods myApi = mRetrofit.create(IApiMethods.class);
         Log.d("TAG", "GIFIntentService");
-        myApi.getResults(ServiceHelper.PUBCLIC_KEY);
+        myApi.getResults(ConstantsNetwork.PUBCLIC_KEY);
 
-        Call<Result> call = myApi.getResults(ServiceHelper.PUBCLIC_KEY);
+        Call<Result> call = myApi.getResults(ConstantsNetwork.PUBCLIC_KEY);
         try {
             Response<Result> resultResponse = call.execute();
 
@@ -79,20 +74,47 @@ public class GIFIntentService extends IntentService {
             }
 
             Intent intentResponse = new Intent();
-            intentResponse.setAction(ACTION_GIFIntentService);
+            intentResponse.setAction(ConstantsNetwork.ACTION_GIFIntentService);
             intentResponse.addCategory(Intent.CATEGORY_DEFAULT);
-            intentResponse.putStringArrayListExtra(MainActivity.EXTRA_KEY_MAINACTIVITY_OUT, listUrls);
+            intentResponse.putStringArrayListExtra(ConstantsNetwork.EXTRA_KEY_MAINACTIVITY_OUT, listUrls);
             Log.d("TAG", "sendBroadcast");
             sendBroadcast(intentResponse);
+//            sendResults(ConstantsNetwork.EXTRA_KEY_SEARCHABLEACTIVITY_OUT,listUrls);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void downloadSearchGifs()
-    {
+    private void downloadSearchGifs(String query) {
+        IApiMethods myApi = mRetrofit.create(IApiMethods.class);
+        Log.d("TAG", "GIFIntentService: downloadSearchGifs");
+        myApi.getResultsOfSearch(query, ConstantsNetwork.PUBCLIC_KEY);
 
+        Call<Result> call = myApi.getResultsOfSearch(query, ConstantsNetwork.PUBCLIC_KEY);
+        try {
+            Response<Result> resultResponse = call.execute();
+
+            ArrayList<String> listUrls = new ArrayList<>();
+            List<Datum> list = resultResponse.body().getData();
+            String url = "";
+            for (int i = 0; i < list.size(); i++) {
+                url = list.get(i).getImages().getFixedHeight().getUrl();
+                listUrls.add(url);
+                CachingGifs.getInstance().addMovieToSearchableMemoryCache(url, getMovie(url));
+
+            }
+
+            Intent intentResponse = new Intent();
+            intentResponse.setAction(ConstantsNetwork.ACTION_SERACH_GIFIntentService);
+            intentResponse.addCategory(ConstantsNetwork.CATEGORY_SEARCH_GIFIntentService);
+            intentResponse.putStringArrayListExtra(ConstantsNetwork.EXTRA_KEY_SEARCHABLEACTIVITY_OUT, listUrls);
+            Log.d("TAG", "sendBroadcast");
+            sendBroadcast(intentResponse);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private Movie getMovie(String url) {
@@ -131,9 +153,7 @@ public class GIFIntentService extends IntentService {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         return gifMovie;
-
     }
 
     private static byte[] streamToBytes(InputStream is) {

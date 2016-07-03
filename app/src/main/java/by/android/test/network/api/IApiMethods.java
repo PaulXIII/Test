@@ -1,4 +1,4 @@
-package by.android.test.network;
+package by.android.test.network.api;
 
 import by.android.test.network.response.Result;
 import retrofit2.Call;

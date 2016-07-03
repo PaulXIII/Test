@@ -2,7 +2,6 @@ package by.android.test.UI;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Movie;
 import android.util.AttributeSet;
 import android.view.View;
@@ -16,7 +15,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import by.android.test.MainActivity;
-import by.android.test.R;
 
 /**
  * Created by Павел on 29.06.2016.

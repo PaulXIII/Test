@@ -1,9 +1,6 @@
 package by.android.test.network.downloading;
 
 import android.graphics.Movie;
-import android.support.v4.util.LruCache;
-import android.util.Log;
-import android.widget.ImageView;
 
 import java.util.Collections;
 import java.util.Map;
@@ -17,9 +14,14 @@ public class CachingGifs {
     private static CachingGifs instanceCache = new CachingGifs();
 
     private Map<String, Movie> mMemoryCache= Collections.synchronizedMap(new WeakHashMap<String, Movie>());
+    private Map<String, Movie> mSearchableMemoryCache= Collections.synchronizedMap(new WeakHashMap<String, Movie>());
 
     public Map<String, Movie> getmMemoryCache() {
         return mMemoryCache;
+    }
+
+    public Map<String, Movie> getmSearchableMemoryCache() {
+        return mSearchableMemoryCache;
     }
 
     private CachingGifs() {
@@ -34,12 +36,22 @@ public class CachingGifs {
     }
 
     public void addMovieToMemoryCache(String key, Movie movie) {
-        if (getMovieFromMemCache(key) == null) {
+        if (getMovieFromMemoryCache(key) == null) {
             mMemoryCache.put(key, movie);
         }
     }
 
-    public Movie getMovieFromMemCache(String key) {
+    public void addMovieToSearchableMemoryCache(String key, Movie movie) {
+        if (getMovieFromMemoryCache(key) == null) {
+            mMemoryCache.put(key, movie);
+        }
+    }
+
+    public Movie getMovieFromMemoryCache(String key) {
+        return mMemoryCache.get(key);
+    }
+
+    public Movie getMovieFromSearchableMemoryCache(String key) {
         return mMemoryCache.get(key);
     }
 
@@ -48,4 +60,8 @@ public class CachingGifs {
         mMemoryCache.clear();
     }
 
+    public void clearSearchableCache()
+    {
+        mSearchableMemoryCache.clear();
+    }
 }

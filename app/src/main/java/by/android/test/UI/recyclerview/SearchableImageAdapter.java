@@ -17,7 +17,7 @@ import by.android.test.network.downloading.CachingGifs;
 /**
  * Created by Павел on 29.06.2016.
  */
-public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapterHolder> {
+public class SearchableImageAdapter extends RecyclerView.Adapter<SearchableImageAdapter.SearchableImageAdapterHolder> {
 
 
     private List<String> mGifs = new ArrayList<>();
@@ -38,13 +38,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
     }
 
     @Override
-    public ImageAdapterHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SearchableImageAdapterHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_images_item, parent, false);
-        return new ImageAdapterHolder(view);
+        return new SearchableImageAdapterHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ImageAdapterHolder holder, int position) {
+    public void onBindViewHolder(SearchableImageAdapterHolder holder, int position) {
         Log.d("TAG", "onBindViewHolder");
         String key = mGifs.get(position);
         Movie gifFromCache = CachingGifs.getInstance().getMovieFromMemoryCache(key);
@@ -60,13 +60,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageAdapter
         return mGifs.size();
     }
 
-    public static class ImageAdapterHolder extends RecyclerView.ViewHolder {
+    public static class SearchableImageAdapterHolder extends RecyclerView.ViewHolder {
 
         View view;
         public GIFView image;
 
 
-        public ImageAdapterHolder(View itemView) {
+        public SearchableImageAdapterHolder(View itemView) {
             super(itemView);
             view = itemView;
             image = (GIFView) itemView.findViewById(R.id.image_view_item);

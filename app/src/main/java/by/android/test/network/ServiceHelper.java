@@ -14,10 +14,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ServiceHelper {
 
-    public final static String URLServer = "http://api.giphy.com/";
-    public final static String PUBCLIC_KEY = "dc6zaTOxFJmzC";
-
-
     private static ServiceHelper instance = new ServiceHelper();
     private Retrofit mRetrofit;
 
@@ -36,17 +32,13 @@ public class ServiceHelper {
 
         if (mRetrofit != null) return mRetrofit;
 
-
         mRetrofit = new Retrofit.Builder()
-                .baseUrl(URLServer)
+                .baseUrl(ConstantsNetwork.URLServer)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         return mRetrofit;
 
     }
-
-
-
 
 }
